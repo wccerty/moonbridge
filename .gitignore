@@ -1,0 +1,10 @@
+.DS_Store
+_build/
+dist/
+target/
+target
+.mooncakes/
+.moonagent/
+.repos/
+.tools/
+*.obj
