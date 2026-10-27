@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-native:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve pinned module dependencies
+        run: |
+          moon version --all
+          moon update
+
+      - name: Format, check, test, and inspect interfaces
+        run: |
+          moon fmt --check
+          moon check --deny-warn
+          moon test --deny-warn
+          moon info
+          git diff --exit-code -- \
+            pkg.generated.mbti \
+            cmd/main/pkg.generated.mbti \
+            examples/scalar_exports/pkg.generated.mbti
+
+      - name: Build native packages
+        run: moon build --release --target native
+
+      - name: Package Linux header, static archive, and shared library
+        run: |
+          bash scripts/package-linux.sh examples/scalar_exports "$RUNNER_TEMP/moonbridge-dist" scalar_exports
+          cmp examples/scalar_exports/moonbridge.h "$RUNNER_TEMP/moonbridge-dist/scalar_exports.h"
+
+      - name: Link and run C and C++ consumers against .a and .so
+        run: |
+          dist="$RUNNER_TEMP/moonbridge-dist"
+          cc -I "$dist" examples/scalar_exports/consumer.c "$dist/libscalar_exports.a" -o "$dist/static-c-consumer"
+          "$dist/static-c-consumer"
+          c++ -I "$dist" examples/scalar_exports/consumer.cpp "$dist/libscalar_exports.a" -o "$dist/static-cpp-consumer"
+          "$dist/static-cpp-consumer"
+          cc -I "$dist" examples/scalar_exports/consumer.c -L "$dist" -lscalar_exports -Wl,-rpath,"$dist" -o "$dist/shared-c-consumer"
+          "$dist/shared-c-consumer"
+          c++ -I "$dist" examples/scalar_exports/consumer.cpp -L "$dist" -lscalar_exports -Wl,-rpath,"$dist" -o "$dist/shared-cpp-consumer"
+          "$dist/shared-cpp-consumer"
