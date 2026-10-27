@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "wccerty/moonbridge"
+
+// Values
+pub fn is_c_identifier(String) -> Bool
+
+pub fn parse_abi_type(String) -> Result[AbiType, String]
+
+pub fn render_header(Array[Export], String) -> Result[String, String]
+
+pub fn scan_exports(String, String) -> Result[Array[Export], String]
+
+// Errors
+
+// Types and methods
+pub(all) enum AbiType {
+  Bool
+  Int32
+  UInt32
+  Int64
+  UInt64
+  Float
+  Double
+  Unit
+}
+pub fn AbiType::c_spelling(Self) -> String
+
+pub(all) struct Export {
+  source_path : String
+  source_line : Int32
+  moonbit_name : String
+  c_name : String
+  parameters : Array[AbiType]
+  result : AbiType
+}
+
+// Type aliases
+
+// Traits
