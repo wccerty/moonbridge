@@ -19,13 +19,14 @@
 ## 远程交付
 
 - [x] 仅执行 `gh api user --jq .login` 核验当前 GitHub CLI 用户名；2026-10-27 在当前有效会话的命令输出为 `wccerty`、退出码 0。未读取令牌、历史账号或其他用户资料。
-- [ ] 为真实 GitHub 账号配置可关联的提交作者邮箱；当前仓库未设置 `user.name` / `user.email`，因此尚无提交。
-- [ ] 按真实开发里程碑提交至少 11 次有意义改动；不空提交、不回填日期、不伪造贡献者。
+- [x] 按用户授权配置仓库本地提交作者 `wccerty` 和 GitHub ID-based noreply 格式；推送后 GitHub 将全部 13 个提交关联到 `wccerty`。
+- [x] 按功能里程碑提交 13 次有意义改动；没有空提交、回填日期或伪造贡献者。
 - [x] 已创建 GitHub 公共仓库 `https://github.com/wccerty/moonbridge`，并填写 `moon.mod` 的 `repository` 字段。
-- [ ] 配置真实作者信息后推送 `main`；当前远程仓库尚无提交。
-- [ ] 确认仓库 README、LICENSE、历史提交与 CI 结果可公开审阅。
-- [ ] 首次推送后运行并记录实际远程 GitHub Actions 结果。
+- [x] 已推送 `main`，该分支现为公开仓库默认分支。
+- [x] 仓库 README、LICENSE 和 13 条提交历史公开可见；GitHub 将提交作者关联到 `wccerty`。
+- [x] GitHub Actions 主 CI（run `40521954109`）与 Copilot setup（run `40521953181`）均成功。
 - [x] 检查 `moon package --list` 的最终清单；Mooncakes 发布仍待完成。
+- [ ] `moon publish --dry-run` 的包内检查通过，但服务因当前 Mooncakes CLI 身份与模块 owner `wccerty` 不匹配返回 403；用户需以 `wccerty` 登录后再发布。
 
 ## 赛事申报
 

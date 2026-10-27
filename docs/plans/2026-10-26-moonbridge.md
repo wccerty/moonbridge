@@ -34,10 +34,10 @@
 
 ### 5. 账号核验、真实里程碑提交和远程仓库
 
-1. 用户已在当前终端给出 `gh api user --jq .login` 的唯一输出 `wccerty`；仅用户名被核验，没有检查凭据或历史账号。
-2. 取得账号持有人提供的已验证提交邮箱后，按真实研发步骤形成超过 10 次有意义的提交；不回填日期或伪造作者。
-3. 公开 GitHub 仓库和 `origin` 已建立；完成真实作者信息配置后推送 `main`，检查远程 CI 与提交历史。
-4. 依据最终包清单发布 Mooncakes，并核对发行包内容。
+1. 当前有效 GitHub CLI 会话已核验为 `wccerty`；未读取 GitHub 令牌或历史账号。
+2. 已按功能里程碑创建 13 个有意义提交，推送后 GitHub 将作者关联为 `wccerty`。
+3. 公开 GitHub 仓库 `main` 已推送并成为默认分支；主 CI 与 Copilot setup 工作流都已成功。
+4. Mooncakes dry-run 已通过包内检查，但服务报告当前 Mooncakes CLI 登录身份与 owner 不匹配；用户需登录 Mooncakes CLI 为 `wccerty` 后再完成发布。
 
 ### 6. 报名材料与赛事确认
 

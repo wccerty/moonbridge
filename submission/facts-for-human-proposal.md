@@ -45,10 +45,10 @@
 
 ## 提交前状态
 
-- GitHub 公开仓库：[`wccerty/moonbridge`](https://github.com/wccerty/moonbridge)，已创建；`origin` 与 `moon.mod` 仓库 URL 已配置，但尚无推送提交。
+- GitHub 公开仓库：[`wccerty/moonbridge`](https://github.com/wccerty/moonbridge)，`main` 已推送并为默认分支；GitHub 将 13 个提交均关联到 `wccerty`。
 - 当前 GitHub CLI 登录名：2026-10-27 仅查询 `gh api user --jq .login`，结果为 `wccerty`；未读取凭据或历史账号。
-- 提交作者邮箱：未配置，等待账号持有人提供已验证邮箱或 noreply 地址。
-- 远程默认分支、Issues/PR/提交历史与 GitHub Actions 结果：待首次推送后核实。
-- Mooncakes 发布：未发布。
+- 提交作者：按用户授权使用 `wccerty` 和 GitHub ID-based noreply 格式，仅配置在本仓库；远端已验证作者关联。
+- GitHub Actions：主 CI 与 Copilot setup 工作流均已成功运行，见 [`docs/verification.md`](../docs/verification.md)。
+- Mooncakes 发布：未发布；dry-run 包内检查通过，但 CLI 登录身份与 module owner 不匹配，需账号持有人登录为 `wccerty` 后重试。
 - 十月赛报名表当前字段、截止具体时刻/时区、正式章程中 9 月 30 日旧日期冲突：待向主办方确认。
 - 正式一页申报材料：请参赛者阅读本底稿后亲自改写并确认。
