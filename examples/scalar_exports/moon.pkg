@@ -1,0 +1,2 @@
+// A deliberately small downstream package used by the end-to-end example.
+pkgtype(kind: "foreign_library")
