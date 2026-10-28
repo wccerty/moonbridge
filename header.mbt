@@ -7,6 +7,10 @@ pub fn render_header(
   if !is_c_identifier(header_guard) {
     return Err("header guard must be a C identifier")
   }
+  let diagnostics = validate_exports(exports)
+  if has_errors(diagnostics) {
+    return Err(format_diagnostics(diagnostics))
+  }
   // The scanner preserves source order; the CLI sorts source filenames first.
   let ordered = [ for item in exports => item ]
   for i = 0; i < ordered.length(); i = i + 1 {
@@ -24,6 +28,10 @@ pub fn render_header(
   output.write_string("#include <stdint.h>\n\n")
   output.write_string("#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n")
   for item in ordered {
+    if item.parameter_names.length() != item.parameters.length() {
+      return Err("parameter name count does not match parameter type count")
+    }
+    let c_parameter_names = parameter_c_names(item.parameter_names)
     output.write_string(item.result.c_spelling())
     output.write_char(' ')
     output.write_string(item.c_name)
@@ -36,7 +44,8 @@ pub fn render_header(
           output.write_string(", ")
         }
         output.write_string(item.parameters[i].c_spelling())
-        output.write_string(" arg\{i}")
+        output.write_char(' ')
+        output.write_string(c_parameter_names[i])
       }
     }
     output.write_string(");\n")
@@ -45,4 +54,36 @@ pub fn render_header(
     "\n#ifdef __cplusplus\n}\n#endif\n\n#endif /* \{header_guard} */\n",
   )
   Ok(output.to_string())
+}
+
+///|
+/// Pick readable C parameter names and replace C/C++ keywords or collisions.
+pub fn parameter_c_names(names : Array[String]) -> Array[String] {
+  let output : Array[String] = []
+  for i = 0; i < names.length(); i = i + 1 {
+    let candidate = names[i]
+    let mut selected = if is_c_identifier(candidate) {
+      candidate
+    } else {
+      "arg\{i}"
+    }
+    let mut suffix = 0
+    while contains_parameter_name(output, selected) {
+      suffix = suffix + 1
+      selected = "moonbridge_arg\{i}_\{suffix}"
+    }
+    output.push(selected)
+  }
+  output
+}
+
+///|
+/// Check whether a parameter name was already selected for this prototype.
+fn contains_parameter_name(names : Array[String], candidate : String) -> Bool {
+  for name in names {
+    if name == candidate {
+      return true
+    }
+  }
+  false
 }

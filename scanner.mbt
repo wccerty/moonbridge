@@ -6,6 +6,32 @@ fn is_ignorable_line(line : String) -> Bool {
 }
 
 ///|
+/// Remove a trailing MoonBit line comment without treating slashes in strings as comments.
+fn strip_trailing_line_comment(line : String) -> String {
+  let chars = line.to_array()
+  let mut quoted = false
+  let mut escaped = false
+  for i = 0; i < chars.length(); i = i + 1 {
+    let current = chars[i]
+    if current == '"' && !escaped {
+      quoted = !quoted
+    }
+    if !quoted &&
+      current == '/' &&
+      i + 1 < chars.length() &&
+      chars[i + 1] == '/' {
+      return line[0:i].trim().to_owned()
+    }
+    if current == '\\' && !escaped {
+      escaped = true
+    } else {
+      escaped = false
+    }
+  }
+  line.trim().to_owned()
+}
+
+///|
 /// Parse a single `#export_name("symbol")` attribute.
 fn parse_export_name(line : String) -> Result[String, String] {
   match line.split_once("(") {
@@ -75,6 +101,7 @@ fn parse_function_header(
             )
           }
           let parameters : Array[AbiType] = []
+          let parameter_names : Array[String] = []
           if !parameter_list.trim().is_empty() {
             for parameter in parameter_list.split(",") {
               if parameter.trim().is_empty() {
@@ -82,13 +109,17 @@ fn parse_function_header(
               }
               match parameter.split_once(":") {
                 Some((parameter_name, type_name)) => {
-                  if parameter_name.trim().is_empty() {
+                  let name = parameter_name.trim().to_owned()
+                  if name.is_empty() {
                     return Err("parameter name is missing")
                   }
                   match parse_abi_type(type_name.to_owned()) {
                     Ok(Unit) =>
                       return Err("Unit is only supported as a function result")
-                    Ok(abi_type) => parameters.push(abi_type)
+                    Ok(abi_type) => {
+                      parameters.push(abi_type)
+                      parameter_names.push(name)
+                    }
                     Err(error) => return Err(error)
                   }
                 }
@@ -117,6 +148,7 @@ fn parse_function_header(
             moonbit_name,
             c_name,
             parameters,
+            parameter_names,
             result,
           })
         }
@@ -141,7 +173,7 @@ pub fn scan_exports(
   let mut header = StringBuilder()
   let mut started = false
   for i = 0; i < lines.length(); i = i + 1 {
-    let line = lines[i].to_owned().trim().to_owned()
+    let line = strip_trailing_line_comment(lines[i].to_owned())
     if pending_name is Some(c_name) {
       if is_ignorable_line(line) {
         continue
@@ -152,7 +184,7 @@ pub fn scan_exports(
         }
         if !line.has_prefix("pub fn") {
           return Err(
-            "{source_path}:{pending_line}: #export_name must precede a public function",
+            "\{source_path}:\{pending_line}: #export_name must precede a public function",
           )
         }
         started = true

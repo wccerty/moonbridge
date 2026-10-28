@@ -7,14 +7,14 @@
 extern "C" {
 #endif
 
-int32_t moonbridge_add_i32(int32_t arg0, int32_t arg1);
-int32_t moonbridge_add_i32_via_array(int32_t arg0, int32_t arg1);
-int32_t moonbridge_echo_bool(int32_t arg0);
-uint32_t moonbridge_echo_u32(uint32_t arg0);
-int64_t moonbridge_echo_i64(int64_t arg0);
-uint64_t moonbridge_echo_u64(uint64_t arg0);
-float moonbridge_echo_float(float arg0);
-double moonbridge_echo_double(double arg0);
+int32_t moonbridge_add_i32(int32_t lhs, int32_t rhs);
+int32_t moonbridge_add_i32_via_array(int32_t lhs, int32_t rhs);
+int32_t moonbridge_echo_bool(int32_t value);
+uint32_t moonbridge_echo_u32(uint32_t value);
+int64_t moonbridge_echo_i64(int64_t value);
+uint64_t moonbridge_echo_u64(uint64_t value);
+float moonbridge_echo_float(float value);
+double moonbridge_echo_double(double value);
 void moonbridge_reset(void);
 
 #ifdef __cplusplus

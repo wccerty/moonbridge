@@ -43,6 +43,74 @@ pub fn AbiType::c_spelling(self : AbiType) -> String {
 }
 
 ///|
+/// The canonical spelling used by MoonBit source declarations and manifests.
+pub fn AbiType::moonbit_spelling(self : AbiType) -> String {
+  match self {
+    Bool => "Bool"
+    Int32 => "Int32"
+    UInt32 => "UInt32"
+    Int64 => "Int64"
+    UInt64 => "UInt64"
+    Float => "Float"
+    Double => "Double"
+    Unit => "Unit"
+  }
+}
+
+///|
+/// The scalar width in bits; `Unit` has no value width.
+pub fn AbiType::bit_width(self : AbiType) -> Int32 {
+  match self {
+    Bool => 32
+    Int32 | UInt32 | Float => 32
+    Int64 | UInt64 | Double => 64
+    Unit => 0
+  }
+}
+
+///|
+/// Whether this type participates in integer range checks in a C consumer.
+pub fn AbiType::is_integer(self : AbiType) -> Bool {
+  match self {
+    Int32 | UInt32 | Int64 | UInt64 => true
+    _ => false
+  }
+}
+
+///|
+/// Compare ABI variants without relying on the deprecated implicit Eq methods.
+pub fn AbiType::same_as(self : AbiType, other : AbiType) -> Bool {
+  match (self, other) {
+    (Bool, Bool)
+    | (Int32, Int32)
+    | (UInt32, UInt32)
+    | (Int64, Int64)
+    | (UInt64, UInt64)
+    | (Float, Float)
+    | (Double, Double)
+    | (Unit, Unit) => true
+    _ => false
+  }
+}
+
+///|
+/// A stable, human-readable declaration for diagnostic output.
+pub fn Export::signature(self : Export) -> String {
+  let output = StringBuilder()
+  output.write_string(self.moonbit_name)
+  output.write_char('(')
+  for i = 0; i < self.parameters.length(); i = i + 1 {
+    if i > 0 {
+      output.write_string(", ")
+    }
+    output.write_string(self.parameters[i].moonbit_spelling())
+  }
+  output.write_string(") -> ")
+  output.write_string(self.result.moonbit_spelling())
+  output.to_string()
+}
+
+///|
 /// A single exported function after ABI validation.
 pub(all) struct Export {
   source_path : String
@@ -50,6 +118,7 @@ pub(all) struct Export {
   moonbit_name : String
   c_name : String
   parameters : Array[AbiType]
+  parameter_names : Array[String]
   result : AbiType
 }
 

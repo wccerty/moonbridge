@@ -4,13 +4,15 @@ MoonBridge is a MoonBit-first tool for generating a C/C++ header from a MoonBit 
 
 ## Status
 
-- **Implemented:** source scanning, scalar type validation, deterministic C/C++ header generation, CLI input checks, and staged output replacement.
-- **Verified locally:** MoonBit package checks/tests, native CLI build/run, and C plus C++ consumers that compile, link, and execute against Windows `.lib` and Linux `.a`/`.so` outputs.
+- **Implemented:** package scanning, scalar ABI validation, deterministic C/C++ headers, a versioned JSON manifest, a human-readable ABI report, structured diagnostics, stale-header checks, recursive package discovery, and ABI snapshot comparison.
+- **Verified locally:** MoonBit package checks/tests and native CLI build/run. The expanded revision's Windows `.lib` was rechecked with C and C++ consumers; Linux `.a`/`.so` packaging and consumers passed on 2026-10-27 and await rerun for this revision.
 - **Linux shared-library packaging:** the script rebuilds MoonBit-generated C and the toolchain's runtime C objects with `-fPIC`, rejects text relocations, and checks every generated header symbol in both libraries.
 
 MoonBit already provides `#export_name` and scalar C ABI mappings. MoonBridge adds header generation around those declarations and a Linux packaging step because the native build emits a static archive rather than a `.so` directly. The packaging step recompiles the generated C and runtime sources as PIC before linking the shared library.
 
 ## Quick start
+
+The CLI can also emit a JSON manifest and a human-readable ABI report, verify that a checked-in header is current, and compare two package snapshots. Additions are compatible; removed symbols and C-visible signature changes are breaking. Use the compare command with `--deny-breaking` in CI to reject breaking changes. Add `--recursive` to scan nested directories that contain their own `moon.pkg`.
 
 The example package is a MoonBit `foreign_library` with nine exports. Its consumers call every supported scalar mapping (`Bool`, signed and unsigned 32/64-bit integers, `Float`, `Double`, and `Unit`) and an implementation that allocates an internal MoonBit array:
 
@@ -58,9 +60,9 @@ The script requires Linux, the official MoonBit toolchain runtime sources under 
 | `Float` / `Double` | `float` / `double` |
 | `Unit` result | `void` |
 
-The scanner accepts public top-level functions with explicit positional parameter types. It rejects `String`, `Bytes`, arrays, pointers/objects, structs, payload enums, closures, generics, optional or labelled/defaulted parameters, and error results. It also rejects invalid/duplicate C symbols and invalid include guards. C argument names are emitted as `arg0`, `arg1`, and so on.
+The scanner accepts public top-level functions with explicit positional parameter types. It rejects `String`, `Bytes`, arrays, pointers/objects, structs, payload enums, closures, generics, optional or labelled/defaulted parameters, and error results. It also rejects invalid/duplicate C symbols and invalid include guards. Safe MoonBit parameter names are retained in prototypes; C/C++ keywords, reserved identifiers, and collisions receive deterministic fallback names.
 
-The CLI scans `.mbt` files directly inside the selected package directory, in filename order. It skips `_test.mbt` and `_wbtest.mbt`. It parses a documented narrow declaration shape rather than claiming to be a complete MoonBit parser; keep `#export_name` on its own line before a public function, and use a simple scalar signature. Unsupported forms return a source path and line number.
+The CLI scans production `.mbt` files in stable path order and skips `_test.mbt` and `_wbtest.mbt`. It parses a documented narrow declaration shape rather than claiming to be a complete MoonBit parser; keep `#export_name` on its own line before a public function, and use a simple scalar signature. Unsupported forms return a source path and line number.
 
 ## Output safety
 

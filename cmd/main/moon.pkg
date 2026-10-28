@@ -1,8 +1,7 @@
 import {
   "moonbitlang/async",
-  "moonbitlang/async/fs",
   "moonbitlang/core/env",
-  "wccerty/moonbridge",
+  "wccerty/moonbridge/cmd/cli",
 }
 
 pkgtype(kind: "executable")

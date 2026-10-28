@@ -7,7 +7,7 @@
 - 项目名：MoonBridge。
 - 方向：开发者工具 / MoonBit 与 C/C++ 集成。
 - 解决的问题：把 MoonBit 包里的 `#export_name` 标量导出声明转换成 C/C++ 头文件，并在 Linux 上构建外部项目可调用的 `.a` 和 `.so`。
-- 新增部分：可审阅的确定性头文件、ABI 类型白名单与错误诊断、Linux PIC 共享库打包、独立 C/C++ 消费者验证。
+- 新增部分：可审阅的确定性头文件、ABI 类型白名单与结构化诊断、版本化 JSON manifest、ABI 人类可读报告、递归包扫描、生成头文件漂移检查、版本间 ABI 兼容性比较、Linux PIC 共享库打包、独立 C/C++ 消费者验证。
 - 不是从零发明 MoonBit 函数导出机制。MoonBit 已提供 `#export_name` 和 `foreign_library`；MoonBridge 提供通用生成与打包流程。
 
 ## 至少三个完整使用场景
@@ -26,7 +26,7 @@
 - Linux 打包脚本保留 MoonBit 编译器生成的 `.a`；为 `.so` 将匹配工具链 runtime C 源和生成 C 源重编为 PIC，检查导出符号并拒绝文本重定位。
 - 示例含 9 个导出，C/C++ 消费者实际调用全部支持映射：`Bool`、有符号/无符号 32/64 位整数、`Float`、`Double`、`Unit` 返回，以及内部申请 MoonBit 数组的 `Int32` 实现。Windows `.lib` 和 Linux `.a/.so` 链接运行均通过。
 - 本地工具链：Moon `0.1.20261023`，`moonc v0.10.17+d971670cd`；Linux 验证使用 Ubuntu 24.04、GCC/G++ 13.3.0。
-- MoonBit 代码：7 个 `.mbt` 文件，共 756 行物理行（含注释、空行和测试；不是赛事门槛）。
+- MoonBit 代码：15 个 `.mbt` 文件、2,587 行物理行；去除空行与注释后为 2,320 行（实现 1,592 行、测试 728 行）。该统计不含赛事门槛判断；统计口径为仓库内 `.mbt` 文件。
 
 ## 创新性与生态边界
 
@@ -45,10 +45,11 @@
 
 ## 提交前状态
 
-- GitHub 公开仓库：[`wccerty/moonbridge`](https://github.com/wccerty/moonbridge)，`main` 已推送并为默认分支；GitHub 将 13 个提交均关联到 `wccerty`。
+- GitHub 公开仓库：[`wccerty/moonbridge`](https://github.com/wccerty/moonbridge)，此前核验的 `main` 为默认分支；截至 2026-10-27，GitHub 将已推送的 13 个提交均关联到 `wccerty`。2026-10-28 新增 ABI 功能提交尚未推送。
+- 本次远端核验：`gh api user --jq .login` 返回 HTTP 401，因此没有推送或触发远端 CI；未读取令牌、历史账号或其他用户资料。
 - 当前 GitHub CLI 登录名：2026-10-27 仅查询 `gh api user --jq .login`，结果为 `wccerty`；未读取凭据或历史账号。
 - 提交作者：按用户授权使用 `wccerty` 和 GitHub ID-based noreply 格式，仅配置在本仓库；远端已验证作者关联。
-- GitHub Actions：主 CI 与 Copilot setup 工作流均已成功运行，见 [`docs/verification.md`](../docs/verification.md)。
+- GitHub Actions：既有主 CI 与 Copilot setup 均成功运行，见 [`docs/verification.md`](../docs/verification.md)；本次本地 ABI 扩展尚未推送，因此未声称其已通过远端 CI。
 - Mooncakes 发布：未发布；dry-run 包内检查通过，但 CLI 登录身份与 module owner 不匹配，需账号持有人登录为 `wccerty` 后重试。
 - 十月赛报名表当前字段、截止具体时刻/时区、正式章程中 9 月 30 日旧日期冲突：待向主办方确认。
 - 正式一页申报材料：请参赛者阅读本底稿后亲自改写并确认。

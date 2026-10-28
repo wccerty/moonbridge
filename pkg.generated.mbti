@@ -2,17 +2,66 @@
 package "wccerty/moonbridge"
 
 // Values
+pub fn abi_contract_id() -> String
+
+pub fn compare_export_sets(Array[Export], Array[Export]) -> Result[AbiComparison, String]
+
+pub fn format_diagnostics(Array[Diagnostic]) -> String
+
+pub fn has_errors(Array[Diagnostic]) -> Bool
+
 pub fn is_c_identifier(String) -> Bool
+
+pub fn parameter_c_names(Array[String]) -> Array[String]
 
 pub fn parse_abi_type(String) -> Result[AbiType, String]
 
+pub fn parse_diagnostic(String, Int32, String) -> Diagnostic
+
+pub fn render_c_prototype(Export) -> String
+
+pub fn render_comparison_json(AbiComparison) -> String
+
+pub fn render_comparison_text(AbiComparison) -> String
+
+pub fn render_diagnostics_json(Array[Diagnostic]) -> String
+
 pub fn render_header(Array[Export], String) -> Result[String, String]
 
+pub fn render_manifest(Array[Export]) -> Result[String, String]
+
+pub fn render_report(Array[Export]) -> Result[String, String]
+
 pub fn scan_exports(String, String) -> Result[Array[Export], String]
+
+pub fn validate_exports(Array[Export]) -> Array[Diagnostic]
 
 // Errors
 
 // Types and methods
+pub(all) struct AbiChange {
+  kind : AbiChangeKind
+  c_name : String
+  old_signature : String?
+  new_signature : String?
+  old_location : String?
+  new_location : String?
+}
+
+pub(all) enum AbiChangeKind {
+  Added
+  Removed
+  SignatureChanged
+}
+
+pub(all) struct AbiComparison {
+  changes : Array[AbiChange]
+  added_count : Int32
+  removed_count : Int32
+  changed_count : Int32
+}
+pub fn AbiComparison::has_breaking_changes(Self) -> Bool
+
 pub(all) enum AbiType {
   Bool
   Int32
@@ -23,7 +72,26 @@ pub(all) enum AbiType {
   Double
   Unit
 }
+pub fn AbiType::bit_width(Self) -> Int32
 pub fn AbiType::c_spelling(Self) -> String
+pub fn AbiType::is_integer(Self) -> Bool
+pub fn AbiType::moonbit_spelling(Self) -> String
+pub fn AbiType::same_as(Self, Self) -> Bool
+
+pub(all) struct Diagnostic {
+  code : String
+  severity : DiagnosticSeverity
+  message : String
+  source_path : String?
+  source_line : Int32?
+  help : String?
+}
+pub fn Diagnostic::format(Self) -> String
+
+pub(all) enum DiagnosticSeverity {
+  Error
+  Warning
+}
 
 pub(all) struct Export {
   source_path : String
@@ -31,8 +99,10 @@ pub(all) struct Export {
   moonbit_name : String
   c_name : String
   parameters : Array[AbiType]
+  parameter_names : Array[String]
   result : AbiType
 }
+pub fn Export::signature(Self) -> String
 
 // Type aliases
 

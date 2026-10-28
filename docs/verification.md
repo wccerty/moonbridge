@@ -75,7 +75,7 @@ An ignored temporary fixture declared a `String` parameter, which the supported 
 
 - A local Linux package and consumer run has passed; `.github/workflows/ci.yml` repeats it on Ubuntu. Remote GitHub Actions run `40521954109` completed successfully on 2026-10-27; the `linux-native` job passed MoonBit checks, build, `.a/.so` packaging, and C/C++ static/shared consumer runs. The Copilot setup workflow run `40521953181` also succeeded.
 - `moon package --list` passed after `moon.mod` was populated with `https://github.com/wccerty/moonbridge`; the package listing includes source, generated interfaces, docs, license notices, example, and packager with no missing-repository warning. The Mooncakes archive is not yet published.
-- Source count and participant rewrite notes are in `submission/`; the current source count is 7 `.mbt` files / 756 physical lines, including comments, blank lines and tests. No package has been published and no contest form has been submitted.
+- Source count and participant rewrite notes are in `submission/`; the 2026-10-28 working tree contains 15 `.mbt` files / 2,587 physical lines and 2,320 nonblank, noncomment lines (1,592 implementation, 728 tests). No package has been published and no contest form has been submitted.
 - The public repository is `https://github.com/wccerty/moonbridge`, with `origin` configured, `main` as default branch, and 13 pushed commits. GitHub's commits API reports all 13 authors as `wccerty`. The current GitHub CLI identity was verified on 2026-10-27 by running `gh api user --jq .login`; the result was `wccerty`.
 
 ## 2026-10-27 toolchain refresh and remote state
@@ -85,3 +85,26 @@ On 2026-10-27, `moon version --all` after upgrade reported `moon 0.1.20261023 (3
 The GitHub identity check is complete: the exact command `gh api user --jq .login` returned `wccerty` with exit code 0. The public profile `email` field was empty, so with the user's authorization the repository-only Git author was set to `wccerty` and the GitHub ID-based noreply format. GitHub confirmed all 13 pushed commits are authored by `wccerty`. The public repo has `main` as its default branch and remote Actions passed.
 
 `moon publish --dry-run` validated the package archive and ran `moon check` on the extracted archive successfully, then returned HTTP 403 because the current Mooncakes CLI login does not match the module owner `wccerty`. No package was uploaded and no Mooncakes account was changed. Retry publication after the user authenticates the Mooncakes CLI as `wccerty`.
+
+## 2026-10-28 ABI tooling expansion
+
+The working tree now adds a JSON ABI manifest, a text ABI inventory, location-aware validation diagnostics, stable recursive package scanning, generated-header drift checking, safe C parameter names, and a package-snapshot comparison API and CLI. The comparator reports additions, removals, and C-visible signature changes; `--deny-breaking` makes removals and signature changes return a failure status. It intentionally ignores MoonBit function and parameter renames when the exported C symbol and C types stay the same.
+
+Current local toolchain from `moon version --all`: Moon `0.1.20261023`, `moonc v0.10.17+d971670cd`, and `moonrun 0.1.20261023`.
+
+| Command or check | Result |
+|---|---|
+| `moon fmt --check` | Passed after the extension. |
+| `moon check --deny-warn` | Passed. |
+| `moon test --deny-warn` | Passed; 28 tests. |
+| `moon info` | Passed; updated generated interface files, including the new CLI package interface. |
+| `moon run cmd/main -- compare --old examples/scalar_exports --new examples/scalar_exports --deny-breaking` | Passed; 0 additions, removals, or signature changes. |
+| `moon run cmd/main -- manifest --package examples/scalar_exports --out _build/moonbridge-manifest-check.json` | Passed; PowerShell `ConvertFrom-Json` confirmed schema 1, 9 exports, and contract `moonbit-c-scalar-v1`. |
+| `moon run cmd/main -- header ...` and `moon run cmd/main -- check ...` | Passed; regenerated the 9-export header and confirmed it is current. |
+| Source size | 15 `.mbt` files; 2,587 physical lines; 2,320 nonblank, noncomment lines (1,592 implementation and example, 728 tests). |
+| `moon run cmd/main -- compare --old _build/abi-compare-old --new _build/abi-compare-new --deny-breaking` | Expected failure verified; detected one addition, one removal, and one signature change, then exited 1. Fixtures are ignored under `_build/`. |
+| `moon build --release --target native` | Passed; produced the CLI executable and scalar example `.lib`. |
+| MSVC C and C++ consumer compile/link/run | Both passed against the regenerated header and release `.lib` after this expansion. |
+| `moon package --list` | Passed; archive listing includes the CLI package, comparator, diagnostics, manifest, report, examples, notices, and docs. |
+
+README, the ABI feature CI step, and submission fact sheets were updated with the new commands and the measured source count. The ABI extension remains local and unpushed; GitHub Actions has not yet run this revision. The current read-only `gh api user --jq .login` check returned HTTP 401, so no remote update was attempted. The Windows `.lib` and C/C++ consumers were rerun successfully after the expansion. The Linux `.a/.so` consumers passed on 2026-10-27; rerun the Linux package workflow and remote CI after publishing this revision.

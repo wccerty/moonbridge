@@ -34,10 +34,19 @@ jobs:
           git diff --exit-code -- \
             pkg.generated.mbti \
             cmd/main/pkg.generated.mbti \
+            cmd/cli/pkg.generated.mbti \
             examples/scalar_exports/pkg.generated.mbti
 
       - name: Build native packages
         run: moon build --release --target native
+
+      - name: Exercise ABI artifact commands
+        run: |
+          moon run cmd/main -- header --package examples/scalar_exports --out examples/scalar_exports/moonbridge.h --guard MOONBRIDGE_SCALAR_EXPORTS_H
+          moon run cmd/main -- check --package examples/scalar_exports --out examples/scalar_exports/moonbridge.h --guard MOONBRIDGE_SCALAR_EXPORTS_H
+          moon run cmd/main -- manifest --package examples/scalar_exports --out "$RUNNER_TEMP/moonbridge-manifest.json"
+          jq -e '.schema_version == 1 and .abi_contract == "moonbit-c-scalar-v1" and (.exports | length == 9)' "$RUNNER_TEMP/moonbridge-manifest.json"
+          moon run cmd/main -- compare --old examples/scalar_exports --new examples/scalar_exports --deny-breaking
 
       - name: Package Linux header, static archive, and shared library
         run: |

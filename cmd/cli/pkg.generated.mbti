@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "wccerty/moonbridge/cmd/cli"
+
+// Values
+pub fn cli_version() -> String
+
+pub fn parse_cli_args(Array[String]) -> Result[CliOptions, String]
+
+pub async fn run(Array[String]) -> Result[Unit, String]
+
+// Errors
+
+// Types and methods
+pub(all) enum CliCommand {
+  GenerateHeader
+  GenerateManifest
+  GenerateReport
+  CheckHeader
+  CompareAbi
+  Help
+  Version
+}
+
+pub(all) struct CliOptions {
+  command : CliCommand
+  package_path : String
+  previous_package_path : String
+  current_package_path : String
+  output_path : String
+  header_guard : String
+  recursive : Bool
+  deny_breaking : Bool
+}
+
+// Type aliases
+
+// Traits
